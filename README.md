@@ -16,6 +16,12 @@ Install gulp
 % npm install -g gulp
 ```
 
+Install bower
+
+```console
+% npm install -g bower
+```
+
 Install npm packages
 
 ```console
