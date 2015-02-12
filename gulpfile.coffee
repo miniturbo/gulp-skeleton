@@ -8,17 +8,10 @@ concat     = require 'gulp-concat'
 uglify     = require 'gulp-uglify'
 debug      = require 'gulp-debug'
 minifyCSS  = require 'gulp-minify-css'
-lib        = require('bower-files')(camelCase: false)
+bowerFiles = require('bower-files')(camelCase: false)
 source     = require 'vinyl-source-stream'
 buffer     = require 'vinyl-buffer'
 browserify = require 'browserify'
-
-bowerFiles = (ext, detail) ->
-  filtered = lib.ext(ext)
-  return filtered.files unless detail
-  return Object.keys(filtered.deps)
-    .map    (key)  -> filtered.deps[key].map (file) -> { file: file, expose: key }
-    .reduce (a, b) -> a.concat(b)
 
 errorHandler = ->
   notify
@@ -29,10 +22,10 @@ errorHandler = ->
   this.emit 'end'
 
 gulp.task 'js', ->
-  files = bowerFiles('js', true)
+  deps = bowerFiles.ext('js').deps
   browserify './public/src/js/app.js'
     .transform 'coffeeify'
-    .external Object.keys(files)
+    .external Object.keys(deps)
     .bundle()
     .on('error', errorHandler)
     .pipe source('app.js')
@@ -41,7 +34,11 @@ gulp.task 'js', ->
     .pipe gulp.dest('./public/js')
 
 gulp.task 'js:vendor', ->
-  files = bowerFiles('js', true)
+  deps  = bowerFiles.ext('js').deps
+  files = Object.keys(deps)
+    .map    (key)  -> deps[key].map (file) -> { file: file, expose: key }
+    .reduce (a, b) -> a.concat(b)
+
   browserify()
     .require files
     .bundle()
@@ -52,7 +49,7 @@ gulp.task 'js:vendor', ->
     .pipe gulp.dest('./public/js')
 
 gulp.task 'css', ->
-  paths = bowerFiles(['scss', 'css']).map (file) -> path.dirname(file)
+  paths = bowerFiles.ext('scss').files.map (file) -> path.dirname(file)
   gulp
     .src './public/src/scss/**/*.scss'
     .pipe plumber(errorHandler: errorHandler)
