@@ -47,3 +47,11 @@ Watch
 ```console
 % gulp watch
 ```
+
+## Example
+
+Minimal application
+
+```console
+% open public/index.html
+```
