@@ -50,7 +50,7 @@ Watch
 
 ## Example
 
-Minimal application
+[Markdown Editor Example](http://vuejs.org/examples)
 
 ```console
 % open public/index.html
