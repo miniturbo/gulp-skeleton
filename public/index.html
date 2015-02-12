@@ -7,14 +7,21 @@
     <title>gulp skeleton</title>
   </head>
   <body>
-    <nav class="navbar navbar-default">
+    <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
           <a class="navbar-brand" href="/">gulp skeleton</a>
         </div>
       </div>
     </nav>
-    <div class="container"></div>
+    <div class="container">
+        <div id="editor" class="row">
+            <form class="col-md-6">
+                <textarea class="form-control" v-model="input"></textarea>
+            </form>
+            <div class="col-md-6 preview" v-html="input | marked"></div>
+        </div>
+    </div>
     <script src="js/vendor.js"></script>
     <script src="js/app.js"></script>
   </body>

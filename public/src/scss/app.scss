@@ -1,7 +1,22 @@
 @import "bootstrap";
 
-.text {
-    font-size: 240%;
-    font-weight: bold;
-    text-shadow: 2px 4px 3px rgba(0,0,0,0.3);
+html,
+body,
+body > .container {
+    height: 100%;
+}
+
+body {
+    padding: 70px 0 20px;
+}
+
+#editor,
+#editor .row,
+#editor .col-md-6 {
+    overflow: scroll;
+    height: 100%;
+}
+
+#editor textarea {
+    height: 100%;
 }
