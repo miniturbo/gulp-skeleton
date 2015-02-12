@@ -61,10 +61,10 @@ gulp.task 'css', ->
     .pipe gulp.dest('./public/css')
 
 gulp.task 'watch', ['build'], ->
-  gulp.watch 'public/src/**/*.coffee', ['js']
-  gulp.watch 'public/src/**/*.js', ['js']
-  gulp.watch 'public/src/**/*.scss', ['css']
-  gulp.watch 'bower_components/**/*.js', ['vendor']
+  gulp.watch './public/src/**/*.coffee', ['js']
+  gulp.watch './public/src/**/*.js', ['js']
+  gulp.watch './public/src/**/*.scss', ['css']
+  gulp.watch './bower_components/**/*.js', ['js:vendor']
 
 gulp.task 'build', ['js', 'js:vendor', 'css']
 gulp.task 'default', ['build']
