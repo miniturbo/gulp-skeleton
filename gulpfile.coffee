@@ -1,5 +1,6 @@
 path       = require 'path'
 gulp       = require 'gulp'
+gulpif     = require 'gulp-if'
 gutil      = require 'gulp-util'
 sass       = require 'gulp-sass'
 plumber    = require 'gulp-plumber'
@@ -13,6 +14,10 @@ source     = require 'vinyl-source-stream'
 buffer     = require 'vinyl-buffer'
 browserify = require 'browserify'
 
+production = process.env.NODE_ENV is 'production'
+
+npmPackages = -> require('./package.json').dependencies
+
 errorHandler = ->
   notify
     .onError
@@ -22,30 +27,24 @@ errorHandler = ->
   this.emit 'end'
 
 gulp.task 'js', ->
-  deps = bowerFiles.ext('js').deps
   browserify './public/src/js/app.js'
     .transform 'coffeeify'
-    .external Object.keys(deps)
+    .external Object.keys(npmPackages())
     .bundle()
     .on('error', errorHandler)
     .pipe source('app.js')
     .pipe buffer()
-    .pipe uglify()
+    .pipe gulpif(production, uglify())
     .pipe gulp.dest('./public/js')
 
 gulp.task 'js:vendor', ->
-  deps  = bowerFiles.ext('js').deps
-  files = Object.keys(deps)
-    .map    (key)  -> deps[key].map (file) -> { file: file, expose: key }
-    .reduce (a, b) -> a.concat(b)
-
   browserify()
-    .require files
+    .require Object.keys(npmPackages())
     .bundle()
     .on('error', errorHandler)
     .pipe source('vendor.js')
     .pipe buffer()
-    .pipe uglify()
+    .pipe gulpif(production, uglify())
     .pipe gulp.dest('./public/js')
 
 gulp.task 'css', ->
@@ -54,14 +53,18 @@ gulp.task 'css', ->
     .src './public/src/scss/**/*.scss'
     .pipe plumber(errorHandler: errorHandler)
     .pipe sass(includePaths: paths)
-    .pipe minifyCSS()
+    .pipe gulpif(production, minifyCSS())
     .pipe gulp.dest('./public/css')
 
 gulp.task 'watch', ['build'], ->
-  gulp.watch './public/src/**/*.coffee', ['js']
-  gulp.watch './public/src/**/*.js', ['js']
-  gulp.watch './public/src/**/*.scss', ['css']
-  gulp.watch './bower_components/**/*.js', ['js:vendor']
+  tasks =
+    './public/src/**/*.coffee'     : ['js']
+    './public/src/**/*.js'         : ['js']
+    './public/src/**/*.scss'       : ['css']
+    './bower_components/**/*.scss' : ['css']
+    './gulpfile.coffee'            : ['build']
+  Object.keys(npmPackages()).forEach (key) -> tasks["./node_modules/#{key}/**/*.js"] = ['js:vendor']
+  Object.keys(tasks).forEach (key) -> gulp.watch key, tasks[key]
 
 gulp.task 'build', ['js', 'js:vendor', 'css']
 gulp.task 'default', ['build']
