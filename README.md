@@ -55,7 +55,3 @@ Watch
 ```console
 % open public/index.html
 ```
-
-[Markdown Editor Example](http://vuejs.org/examples)
-
-Sample application [here](https://github.com/miniturbo/gulp-skeleton/tree/markdown-editor)
