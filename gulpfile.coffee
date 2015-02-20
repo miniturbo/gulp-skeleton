@@ -1,20 +1,18 @@
 path       = require 'path'
 gulp       = require 'gulp'
-gulpif     = require 'gulp-if'
+debug      = require 'gulp-debug'
 gutil      = require 'gulp-util'
-sass       = require 'gulp-sass'
 plumber    = require 'gulp-plumber'
 notify     = require 'gulp-notify'
 concat     = require 'gulp-concat'
+sourcemaps = require 'gulp-sourcemaps'
+sass       = require 'gulp-sass'
 uglify     = require 'gulp-uglify'
-debug      = require 'gulp-debug'
 minifyCSS  = require 'gulp-minify-css'
 bowerFiles = require('bower-files')(camelCase: false)
 source     = require 'vinyl-source-stream'
 buffer     = require 'vinyl-buffer'
 browserify = require 'browserify'
-
-production = process.env.NODE_ENV is 'production'
 
 npmPackages = -> Object.keys require('./package.json').dependencies
 
@@ -27,24 +25,28 @@ errorHandler = ->
   this.emit 'end'
 
 gulp.task 'js', ->
-  browserify './public/src/js/app.js'
+  browserify(entries: './public/src/js/app.js', debug: true)
     .transform 'coffeeify'
     .external npmPackages()
     .bundle()
     .on('error', errorHandler)
     .pipe source('app.js')
     .pipe buffer()
-    .pipe gulpif(production, uglify())
+    .pipe sourcemaps.init(loadMaps: true)
+    .pipe uglify()
+    .pipe sourcemaps.write()
     .pipe gulp.dest('./public/js')
 
 gulp.task 'js:vendor', ->
-  browserify()
+  browserify(debug: true)
     .require npmPackages()
     .bundle()
     .on('error', errorHandler)
     .pipe source('vendor.js')
     .pipe buffer()
-    .pipe gulpif(production, uglify())
+    .pipe sourcemaps.init(loadMaps: true)
+    .pipe uglify()
+    .pipe sourcemaps.write()
     .pipe gulp.dest('./public/js')
 
 gulp.task 'css', ->
@@ -52,8 +54,10 @@ gulp.task 'css', ->
   gulp
     .src './public/src/scss/**/*.scss'
     .pipe plumber(errorHandler: errorHandler)
+    .pipe sourcemaps.init()
     .pipe sass(includePaths: paths)
-    .pipe gulpif(production, minifyCSS())
+    .pipe minifyCSS()
+    .pipe sourcemaps.write()
     .pipe gulp.dest('./public/css')
 
 gulp.task 'watch', ['build'], ->
