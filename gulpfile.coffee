@@ -16,7 +16,7 @@ browserify = require 'browserify'
 
 production = process.env.NODE_ENV is 'production'
 
-npmPackages = -> require('./package.json').dependencies
+npmPackages = -> Object.keys require('./package.json').dependencies
 
 errorHandler = ->
   notify
@@ -29,7 +29,7 @@ errorHandler = ->
 gulp.task 'js', ->
   browserify './public/src/js/app.js'
     .transform 'coffeeify'
-    .external Object.keys(npmPackages())
+    .external npmPackages()
     .bundle()
     .on('error', errorHandler)
     .pipe source('app.js')
@@ -39,7 +39,7 @@ gulp.task 'js', ->
 
 gulp.task 'js:vendor', ->
   browserify()
-    .require Object.keys(npmPackages())
+    .require npmPackages()
     .bundle()
     .on('error', errorHandler)
     .pipe source('vendor.js')
@@ -63,7 +63,7 @@ gulp.task 'watch', ['build'], ->
     './public/src/**/*.scss'       : ['css']
     './bower_components/**/*.scss' : ['css']
     './gulpfile.coffee'            : ['build']
-  Object.keys(npmPackages()).forEach (key) -> tasks["./node_modules/#{key}/**/*.js"] = ['js:vendor']
+  npmPackages().forEach (key) -> tasks["./node_modules/#{key}/**/*.js"] = ['js:vendor']
   Object.keys(tasks).forEach (key) -> gulp.watch key, tasks[key]
 
 gulp.task 'build', ['js', 'js:vendor', 'css']
